@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1220"><title>ESP32 Wi-Fi Relay | Build Guide</title>
+<style>
+:root{color-scheme:dark}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:#0b1220;color:#eef4fa;font:16px/1.6 system-ui,-apple-system,Segoe UI,Arial,sans-serif}main{max-width:800px;margin:auto;padding:24px 18px 70px}header{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #263448;padding-bottom:15px}header strong{font-size:16px}a{color:#6ee7b7;text-decoration:none}.hero{padding:50px 0 25px}.eyebrow{color:#79e8b9;font-size:12px;letter-spacing:.12em;font-weight:800}h1{font-size:clamp(30px,6vw,50px);line-height:1.12;letter-spacing:-.035em;margin:12px 0}h2{font-size:23px;letter-spacing:-.02em;margin:0 0 14px}p{color:#b4c2d4;margin:10px 0 16px}.lead{font-size:18px;max-width:600px}.tag{background:#172e29;border:1px solid #326b56;color:#9aefc8;border-radius:30px;padding:5px 10px;font-size:12px;font-weight:700;display:inline-block}.card{background:#131e2e;border:1px solid #283a4f;border-radius:18px;padding:25px;margin:20px 0}section{margin-top:30px}.parts{display:grid;grid-template-columns:1fr 1fr;gap:9px}.part{background:#1b293b;border-radius:10px;padding:12px;font-size:14px}.part b{display:block;color:white}.diagram{background:#0c1623;border:1px solid #293f52;border-radius:13px;padding:10px;overflow:hidden}.diagram svg{width:100%;height:auto;display:block}.note{font-size:13px;color:#aebdd0}.warn{border-left:3px solid #f6c56a;padding:10px 14px;background:#33291c;color:#ffe9be;border-radius:5px;font-size:14px}.steps{padding-left:24px}.steps li{padding:7px 0}.steps li::marker{color:#79e8b9;font-weight:800}code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;color:#b7f7d8} .codehead{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:14px 16px;background:#202d3e;border-radius:12px 12px 0 0}.codehead b{font-size:14px}button{background:#5de4ad;color:#092218;border:0;border-radius:8px;padding:9px 17px;font-weight:800;font-size:14px;cursor:pointer}button:focus-visible{outline:3px solid white;outline-offset:2px}button:hover{background:#90ffd2}pre{background:#080f1a;border:1px solid #314155;border-top:0;margin:0;border-radius:0 0 12px 12px;padding:18px;max-height:520px;overflow:auto;font:12px/1.6 ui-monospace,Consolas,monospace;tab-size:2;white-space:pre}pre code{color:#d6e6fa}.small{font-size:13px;color:#9daec5}footer{margin-top:36px;padding-top:18px;border-top:1px solid #283a4f;color:#97a9bd;font-size:13px}@media(max-width:480px){.card{padding:18px}.parts{grid-template-columns:1fr 1fr}.part{font-size:13px;padding:10px}pre{font-size:11px;padding:12px}}
+</style></head><body><main><header><strong>⚡ ESP32 Relay Guide</strong><a href="#code">Get code ↓</a></header>
+<div class="hero"><span class="tag">BEGINNER PROJECT</span><h1>Control a relay<br>from your phone.</h1><p class="lead">A simple ESP32 project with a web page that has ON and OFF buttons. No extra apps needed.</p></div>
+<section class="card"><h2>1. What you need</h2><div class="parts"><div class="part"><b>ESP32</b> Development board</div><div class="part"><b>Relay module</b> 1 channel</div><div class="part"><b>Jumper wires</b> 3 wires</div><div class="part"><b>USB cable</b> For uploading</div></div></section>
+<section class="card"><h2>2. Connect the wires</h2><div class="diagram"><svg viewBox="0 0 680 245" role="img" aria-label="ESP32 pin GPIO26 connects to relay IN. ESP32 GND connects to relay GND. ESP32 power connects to relay VCC, using the module's rated supply voltage.">
+<rect x="20" y="28" rx="14" width="210" height="185" fill="#18374b" stroke="#6bbbd5" stroke-width="2"/><text x="125" y="58" text-anchor="middle" fill="#fff" font-size="22" font-weight="700">ESP32</text>
+<rect x="450" y="28" rx="14" width="210" height="185" fill="#27344c" stroke="#9aabc4" stroke-width="2"/><text x="555" y="58" text-anchor="middle" fill="#fff" font-size="20" font-weight="700">Relay module</text>
+<g font-family="Arial,sans-serif" font-size="17" font-weight="700"><text x="197" y="97" text-anchor="end" fill="#f8d38e">3V3 / 5V*</text><text x="197" y="146" text-anchor="end" fill="#a8d2ff">GND</text><text x="197" y="193" text-anchor="end" fill="#9ef3bb">GPIO 26</text><text x="480" y="97" fill="#f8d38e">VCC</text><text x="480" y="146" fill="#a8d2ff">GND</text><text x="480" y="193" fill="#9ef3bb">IN</text></g>
+<path d="M230 90 H450" stroke="#f7d17d" stroke-width="5"/><path d="M230 139 H450" stroke="#9bd1ff" stroke-width="5"/><path d="M230 186 H450" stroke="#71edac" stroke-width="5"/>
+</svg></div><p class="note">*Connect VCC to the voltage specified on <b>your relay module</b> (3.3V or 5V). Some 5V modules do not work reliably with ESP32's 3.3V control signal.</p><div class="warn">Test with a low-voltage circuit first. Do not connect household AC mains wiring as a beginner.</div></section>
+<section class="card"><h2>3. Upload the code</h2><ol class="steps"><li>Open <b>Arduino IDE</b> and select your ESP32 board.</li><li>Create a new sketch. Copy the entire code below and paste it in.</li><li>Change <code>YOUR_WIFI_NAME</code> and <code>YOUR_WIFI_PASSWORD</code>.</li><li>Click <b>Upload</b>.</li><li>Open <b>Serial Monitor</b> at <b>115200 baud</b>. Copy the IP address shown.</li><li>Connect your phone to the same Wi-Fi. Open <code>http://YOUR_ESP32_IP</code> in the browser. Tap <b>ON / OFF</b>.</li></ol><p class="small">This controls the relay over your local Wi-Fi network, not worldwide.</p></section>
+<section class="card" id="code"><h2>4. Complete Arduino code</h2><p>Everything you need is here. Copy it into Arduino IDE.</p><div class="codehead"><b>ESP32_Relay_Lite.ino</b><button id="copy" type="button">Copy code</button></div><pre><code id="source">#include &lt;WiFi.h&gt;
+#include &lt;WebServer.h&gt;
+
+// -------- EDIT ONLY THESE SETTINGS --------
+const char* WIFI_SSID = &quot;YOUR_WIFI_NAME&quot;;
+const char* WIFI_PASSWORD = &quot;YOUR_WIFI_PASSWORD&quot;;
+constexpr uint8_t RELAY_PIN = 26;
+constexpr bool RELAY_ACTIVE_LOW = true; // Most relay modules use LOW = ON
+constexpr bool TURN_OFF_IF_WIFI_LOST = true; // Safety: OFF if Wi-Fi disconnects
+// ------------------------------------------
+
+WebServer server(80);
+bool relayOn = false;
+unsigned long lastReconnectAttempt = 0;
+unsigned long wifiDisconnectedAt = 0;
+
+void applyRelay(bool on) {
+  digitalWrite(RELAY_PIN, (on == RELAY_ACTIVE_LOW) ? LOW : HIGH);
+  relayOn = on;
+  Serial.printf(&quot;Relay: %s\n&quot;, on ? &quot;ON&quot; : &quot;OFF&quot;);
+}
+
+// Standalone: no libraries, fonts, CDN, or external requests.
+const char HTML[] PROGMEM = R&quot;rawliteral(&lt;!doctype html&gt;
+&lt;html lang=&quot;en&quot;&gt;&lt;head&gt;&lt;meta charset=&quot;utf-8&quot;&gt;&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1&quot;&gt;
+&lt;meta name=&quot;theme-color&quot; content=&quot;#101722&quot;&gt;&lt;title&gt;ESP32 Relay&lt;/title&gt;&lt;style&gt;
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:#101722;color:#eef4fc;font:16px system-ui,Arial,sans-serif;display:grid;place-items:center;padding:18px}
+main{width:100%;max-width:390px}.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}.top strong{font-size:20px}.dot{color:#a1acc0;font-size:13px}
+.card{background:#1b2636;border:1px solid #324155;border-radius:19px;padding:30px 22px;text-align:center}
+.power{width:94px;height:94px;border-radius:50%;border:2px solid #64748b;background:#283548;color:#d6deeb;font-size:45px;cursor:pointer}
+.power.on{color:#59efa5;border-color:#59efa5;background:#194935}h1{font-size:25px;margin:20px 0 5px}p{color:#aab8ce;font-size:14px;margin:0 0 26px}.actions{display:flex;gap:10px}
+.actions button{flex:1;background:#2b3a50;color:#fff;border:1px solid #607088;border-radius:12px;padding:16px 10px;font-weight:700;font-size:16px;cursor:pointer}
+.actions button.selected{background:#229b69;border-color:#229b69}.actions #off.selected{background:#48576b;border-color:#728095}button:disabled{opacity:.55;cursor:wait}
+.footer{display:flex;justify-content:space-between;font-size:13px;margin:18px 2px 0;color:#b4c2d4}.footer b{color:#fff}
+#notice{min-height:20px;font-size:13px;text-align:center;color:#aab8ce;margin-top:17px}.bad{color:#ffb9b9!important}.good{color:#70e7ad!important}
+&lt;/style&gt;&lt;/head&gt;&lt;body&gt;&lt;main&gt;&lt;div class=&quot;top&quot;&gt;&lt;strong&gt;⚡ Relay Control&lt;/strong&gt;&lt;span class=&quot;dot&quot; id=&quot;conn&quot;&gt;● Connecting&lt;/span&gt;&lt;/div&gt;
+&lt;section class=&quot;card&quot;&gt;&lt;button class=&quot;power&quot; id=&quot;power&quot; type=&quot;button&quot; disabled aria-label=&quot;Toggle relay&quot;&gt;⏻&lt;/button&gt;&lt;h1 id=&quot;state&quot;&gt;Connecting…&lt;/h1&gt;&lt;p id=&quot;description&quot;&gt;Reading relay status&lt;/p&gt;
+&lt;div class=&quot;actions&quot;&gt;&lt;button id=&quot;off&quot; type=&quot;button&quot; disabled&gt;OFF&lt;/button&gt;&lt;button id=&quot;on&quot; type=&quot;button&quot; disabled&gt;ON&lt;/button&gt;&lt;/div&gt;&lt;/section&gt;
+&lt;div class=&quot;footer&quot;&gt;&lt;span&gt;ESP32 · GPIO 26&lt;/span&gt;&lt;b id=&quot;actual&quot;&gt;Unknown&lt;/b&gt;&lt;/div&gt;&lt;div id=&quot;notice&quot;&gt;Local Wi-Fi only&lt;/div&gt;&lt;/main&gt;
+&lt;script&gt;
+&#x27;use strict&#x27;;
+const $=id=&gt;document.getElementById(id);
+let state=null, busy=false, online=false;
+function render(){
+ $(&#x27;conn&#x27;).textContent=online?&#x27;● Connected&#x27;:&#x27;● Offline&#x27;; $(&#x27;conn&#x27;).className=&#x27;dot &#x27;+(online?&#x27;good&#x27;:&#x27;bad&#x27;);
+ $(&#x27;state&#x27;).textContent=state===null?&#x27;Status unknown&#x27;:(state?&#x27;Relay is ON&#x27;:&#x27;Relay is OFF&#x27;);
+ $(&#x27;description&#x27;).textContent=busy?&#x27;Sending command…&#x27;:(online?&#x27;Ready to control&#x27;:&#x27;Connection unavailable&#x27;);
+ $(&#x27;actual&#x27;).textContent=state===null?&#x27;Unknown&#x27;:(state?&#x27;ON&#x27;:&#x27;OFF&#x27;);
+ $(&#x27;power&#x27;).classList.toggle(&#x27;on&#x27;,state===true);$(&#x27;on&#x27;).classList.toggle(&#x27;selected&#x27;,state===true);$(&#x27;off&#x27;).classList.toggle(&#x27;selected&#x27;,state===false);
+ for(const id of [&#x27;power&#x27;,&#x27;on&#x27;,&#x27;off&#x27;])$(id).disabled=busy||!online;
+}
+async function api(url,opts){
+ const ctrl=new AbortController(),timeout=setTimeout(()=&gt;ctrl.abort(),3000);
+ try {const r=await fetch(url,{...opts,cache:&#x27;no-store&#x27;,signal:ctrl.signal});if(!r.ok)throw Error(&#x27;HTTP &#x27;+r.status);return await r.json();}
+ finally {clearTimeout(timeout);}
+}
+async function refresh(){
+ if(busy||document.hidden)return;
+ busy=true;
+ try{const data=await api(&#x27;/api/status&#x27;);state=!!data.on;online=true;$(&#x27;notice&#x27;).textContent=&#x27;Local Wi-Fi control&#x27;;$(&#x27;notice&#x27;).className=&#x27;&#x27;;}
+ catch(e){online=false;$(&#x27;notice&#x27;).textContent=&#x27;ESP32 unavailable — retrying&#x27;;$(&#x27;notice&#x27;).className=&#x27;bad&#x27;;}
+ finally{busy=false;render();}
+}
+async function command(want){
+ if(busy||!online)return;
+ busy=true;render();
+ try{const data=await api(&#x27;/api/set?state=&#x27;+(want?&#x27;on&#x27;:&#x27;off&#x27;),{method:&#x27;POST&#x27;});state=!!data.on;online=true;$(&#x27;notice&#x27;).textContent=&#x27;Command confirmed&#x27;;$(&#x27;notice&#x27;).className=&#x27;good&#x27;;}
+ catch(e){online=false;state=null;$(&#x27;notice&#x27;).textContent=&#x27;Command not confirmed — checking state&#x27;;$(&#x27;notice&#x27;).className=&#x27;bad&#x27;;}
+ finally{busy=false;render();setTimeout(refresh,200);}
+}
+$(&#x27;on&#x27;).onclick=()=&gt;command(true);$(&#x27;off&#x27;).onclick=()=&gt;command(false);$(&#x27;power&#x27;).onclick=()=&gt;{if(state!==null)command(!state)};
+render();refresh();setInterval(refresh,2000);document.addEventListener(&#x27;visibilitychange&#x27;,()=&gt;{if(!document.hidden)refresh()});
+&lt;/script&gt;&lt;/body&gt;&lt;/html&gt;)rawliteral&quot;;
+
+void statusReply() {
+  server.sendHeader(&quot;Cache-Control&quot;, &quot;no-store, no-cache, must-revalidate&quot;);
+  server.sendHeader(&quot;Pragma&quot;, &quot;no-cache&quot;);
+  server.send(200, &quot;application/json&quot;, relayOn ? &quot;{\&quot;on\&quot;:true}&quot; : &quot;{\&quot;on\&quot;:false}&quot;);
+}
+
+void handleSet() {
+  if (!server.hasArg(&quot;state&quot;)) { server.send(400, &quot;text/plain&quot;, &quot;Missing state&quot;); return; }
+  const String requested = server.arg(&quot;state&quot;);
+  if (requested == &quot;on&quot;) applyRelay(true);
+  else if (requested == &quot;off&quot;) applyRelay(false);
+  else { server.send(400, &quot;text/plain&quot;, &quot;Invalid state&quot;); return; }
+  statusReply();
+}
+
+void setup() {
+  // Set output OFF before configuring the pin. Relay must have a reliable supply.
+  digitalWrite(RELAY_PIN, RELAY_ACTIVE_LOW ? HIGH : LOW);
+  pinMode(RELAY_PIN, OUTPUT);
+  applyRelay(false);
+
+  Serial.begin(115200);
+  delay(100);
+  Serial.println(&quot;\nESP32 Relay Lite&quot;);
+  WiFi.mode(WIFI_STA);
+  WiFi.setSleep(false); // Reduces web server latency on many ESP32 boards
+  WiFi.setAutoReconnect(true);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+
+  server.on(&quot;/&quot;, HTTP_GET, []() {
+    server.sendHeader(&quot;Cache-Control&quot;, &quot;no-store&quot;);
+    server.send_P(200, &quot;text/html&quot;, HTML);
+  });
+  server.on(&quot;/api/status&quot;, HTTP_GET, statusReply);
+  server.on(&quot;/api/set&quot;, HTTP_POST, handleSet);
+  server.onNotFound([](){server.send(404, &quot;text/plain&quot;, &quot;Not found&quot;);});
+  server.begin();
+  Serial.println(&quot;Wi-Fi connecting. Watch for IP address...&quot;);
+}
+
+void loop() {
+  server.handleClient();
+  const unsigned long now = millis();
+  if (WiFi.status() == WL_CONNECTED) {
+    wifiDisconnectedAt = 0;
+    static bool announced = false;
+    static IPAddress lastIP;
+    if (!announced || WiFi.localIP() != lastIP) {
+      Serial.print(&quot;Open http://&quot;); Serial.println(WiFi.localIP());
+      lastIP = WiFi.localIP(); announced = true;
+    }
+  } else {
+    if (wifiDisconnectedAt == 0) wifiDisconnectedAt = now;
+    if (TURN_OFF_IF_WIFI_LOST &amp;&amp; relayOn &amp;&amp; (now - wifiDisconnectedAt &gt;= 3000UL)) applyRelay(false);
+    if (now - lastReconnectAttempt &gt;= 10000UL) {
+      lastReconnectAttempt = now;
+      Serial.println(&quot;Wi-Fi disconnected; reconnecting...&quot;);
+      WiFi.reconnect();
+    }
+  }
+  delay(2); // Yield to Wi-Fi tasks; never block the web server for seconds.
+}
+</code></pre><p class="small">Relay connected to GPIO 26. If ON and OFF work backward, change <code>RELAY_ACTIVE_LOW</code> to <code>false</code>.</p></section>
+<section class="card"><h2>Not working?</h2><p><b>Page won't open?</b> Check that your phone is on the same Wi-Fi and use <code>http://</code>, not <code>https://</code>.</p><p><b>Relay doesn't click?</b> Check GPIO 26, GND, relay voltage rating, and whether your module accepts 3.3V input signals.</p><p><b>Code won't upload?</b> Try holding the ESP32 BOOT button while uploading.</p></section>
+<footer>Made for makers · ESP32 local Wi-Fi relay project</footer>
+</main><script>
+const btn=document.getElementById('copy');btn.addEventListener('click',async()=>{const val=document.getElementById('source').textContent;try{await navigator.clipboard.writeText(val);btn.textContent='Copied!';setTimeout(()=>btn.textContent='Copy code',2000)}catch(e){const area=document.createElement('textarea');area.value=val;document.body.appendChild(area);area.select();const ok=document.execCommand('copy');area.remove();btn.textContent=ok?'Copied!':'Select code to copy';setTimeout(()=>btn.textContent='Copy code',2500)}});
+</script></body></html>
